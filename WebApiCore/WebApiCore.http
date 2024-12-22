@@ -1,0 +1,6 @@
+@WebApiCore_HostAddress = https://localhost:7076
+
+@count=5
+GET {{WebApiCore_HostAddress}}/api/Words/vegetables/{{count}}
+
+###
