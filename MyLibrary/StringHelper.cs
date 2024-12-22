@@ -31,7 +31,7 @@ namespace MyLibrary
             return string.Join("_", str.Split(' ')).ToLower();
         }
 
-        public static bool ContainsString(this string[] stringArray, string searchItem)
+        public static bool ContainsString(this Span<string> inputString, string searchItem)
         {
             return stringArray.Contains(searchItem);
         }
