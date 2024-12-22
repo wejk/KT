@@ -44,72 +44,125 @@ public class HelperTests
     }
 
     [Fact]
-    public void RandomUniqueWords_WordsIsNull_ThrowsArgumentNullException()
-    {
-        // Arrange
-        IEnumerable<string> words = null;
-        int count = 5;
-
-        // Act & Assert
-        Assert.Throws<ArgumentNullException>(() => StringHelper.RandomUniqueWords(words, count));
-    }
-
-    [Fact]
     public void ContainsString_ShouldReturnTrueIfStringExists()
     {
         // Arrange
         var searchString = "apple";
         var stringArray = new[] { "apple", "banana", "cherry" };
-
+        var span = new Span<string>(stringArray);
         // Act
-        var result = stringArray.ContainsString(searchString);
+        var result = span.ContainsString(searchString);
 
         // Assert
         Assert.True(result);
     }
 
     [Fact]
-    public void RandomWords_ReturnsCorrectNumberOfWords()
+    public void RemoveDuplicate_RemovesDuplicatesCorrectly()
     {
         // Arrange
-        var words = new[] { "apple", "banana", "cherry", "date", "elderberry" };
-        int count = 3;
+        var input = new Span<string>(["apple", "banana", "apple", "orange", "banana"]);
+        var expected = new Span<string>(["apple", "banana", "orange"]);
 
         // Act
-        var result = StringHelper.RandomUniqueWords(words, count);
+        var result = StringHelper.RemoveDuplicate(input);
 
         // Assert
-        Assert.Equal(count, result.Count());
+        Assert.Equal(expected.ToArray(), result.ToArray());
     }
 
     [Fact]
-    public void RandomWords_ReturnsUniqueWords()
+    public void RemoveDuplicate_EmptyInput_ReturnsEmpty()
     {
         // Arrange
-        var words = new[] { "banana", "banana", "banana", "date", "elderberry" };
-        var expected = words.RemoveDuplicateWords().Count();
-        int count = 3;
+        var input = new Span<string>(Array.Empty<string>());
+        var expected = new Span<string>(Array.Empty<string>());
 
         // Act
-        var result = StringHelper.RandomUniqueWords(words, count);
+        var result = StringHelper.RemoveDuplicate(input);
 
         // Assert
-        Assert.Equal(expected, result.Count());
+        Assert.Equal(expected.ToArray(), result.ToArray());
     }
 
     [Fact]
-    public void RandomWords_ReturnsAllWordsIfCountIsGreaterThanUniqueArrayLength()
+    public void RemoveDuplicate_NoDuplicates_ReturnsSameInput()
     {
         // Arrange
-        var words = new[] { "banana", "banana", "cherry", "date", "elderberry" };
-        var expected = words.RemoveDuplicateWords().Count();
-        int count = 5;
+        var input = new Span<string>(new string[] { "apple", "banana", "orange" });
+        var expected = new Span<string>(new string[] { "apple", "banana", "orange" });
 
         // Act
-        var result = StringHelper.RandomUniqueWords(words, count);
+        var result = StringHelper.RemoveDuplicate(input);
 
         // Assert
-        Assert.Equal(expected, result.Count());
-        Assert.All(words, word => Assert.Contains(word, result));
+        Assert.Equal(expected.ToArray(), result.ToArray());
+    }
+
+    [Fact]
+    public void RandomWords_ShouldReturnSpecifiedNumberOfWords()
+    {
+        // Arrange
+        var words = new string[] { "apple", "banana", "cherry", "date", "elderberry" }.AsSpan();
+        int numberOfWords = 3;
+
+        // Act
+        var result = words.RandomWords(numberOfWords);
+
+        // Assert
+        Assert.Equal(numberOfWords, result.Length);
+    }
+
+    [Fact]
+    public void RandomWords_ShouldReturnAllWordsIfNumberOfWordsIsGreaterThanOrEqualToLength()
+    {
+        // Arrange
+        var words = new string[] { "apple", "banana", "cherry" }.AsSpan();
+        int numberOfWords = 5;
+
+        // Act
+        var result = words.RandomWords(numberOfWords);
+
+        // Assert
+        Assert.Equal(words.Length, result.Length);
+    }
+
+    [Fact]
+    public void RandomWords_ShouldThrowArgumentException_WhenInputIsEmpty()
+    {
+        // Arrange, Act and Assert
+        Assert.Throws<ArgumentNullException>(() => StringHelper.RandomWords(new Span<string>(), 3));
+    }
+
+    [Fact]
+    public void RandomWords_ShouldThrowArgumentException_WhenNumberOfWordsIsLessThanOrEqualToZero()
+    {
+        // Arrange, Act and Assert
+        Assert.Throws<ArgumentException>(() => StringHelper.RandomWords(new Span<string>(["one", "two", "three"]), 0));
+    }
+
+    [Fact]
+    public void RandomWords_ShouldReturnUniqueWords_WhenNumberOfWordsIsGreaterThanOrEqualToMaxCount()
+    {
+        Span<string> words = ["one", "two", "three"];
+        var result = words.RandomWords(3);
+        Assert.Equal(words.ToArray(), result.ToArray());
+    }
+
+    [Fact]
+    public void RandomWords_ShouldReturnRandomWords_WhenNumberOfWordsIsLessThanMaxCount()
+    {
+        Span<string> words = ["one", "two", "three", "four", "five"];
+        var result = words.RandomWords(3);
+        Assert.Equal(3, result.Length);
+    }
+
+    [Fact]
+    public void RandomWords_ShouldReturnUniqueRandomWords_WhenNumberOfWordsIsLessThanMaxCount()
+    {
+        Span<string> words = ["one", "one", "three", "three", "five"];
+        var result = words.RandomWords(2);
+        Assert.Equal(2, result.Length);
+        Assert.True(result.Slice(0) != result.Slice(1));
     }
 }

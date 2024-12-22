@@ -1,6 +1,4 @@
-﻿using System.Buffers;
-
-namespace MyLibrary
+﻿namespace MyLibrary
 {
     public static class StringHelper
     {
@@ -33,7 +31,7 @@ namespace MyLibrary
 
         public static bool ContainsString(this Span<string> inputString, string searchItem)
         {
-            return stringArray.Contains(searchItem);
+            return inputString.Contains(searchItem);
         }
 
         public static int WordCount(this string str)
@@ -41,41 +39,106 @@ namespace MyLibrary
             return str.Split(" ", StringSplitOptions.RemoveEmptyEntries).Length;
         }
 
-        /// <summary>
-        /// Returns a random set of unique words from the input list of words.
-        /// </summary>
-        /// <param name="words">When words is null</param>
-        /// <param name="numberOfWords"></param>
-        /// <exception cref="ArgumentNullException">words is null</exception>"
-        /// <returns></returns>
-        public static IEnumerable<string> RandomUniqueWords(IEnumerable<string> words, int numberOfWords)
+        public static Span<string> RandomWords(this Span<string> words, int numberOfWords)
         {
-            var uniqueWords = words.RemoveDuplicateWords();
-            var maxCount = uniqueWords.Count();
+            if (words.IsEmpty)
+            {
+                throw new ArgumentNullException("Input cannot be empty");
+            }
 
-            if (numberOfWords > maxCount)
+            if (numberOfWords <= 0)
+            {
+                throw new ArgumentException("Number of words should be greater than 0");
+            }
+
+            var uniqueWords = words.RemoveDuplicate();
+            var maxCount = uniqueWords.Length;
+
+            if (numberOfWords >= maxCount)
             {
                 return uniqueWords;
             }
 
-            var temp = new string[numberOfWords];
             var rand = new Random();
-
+            var temp = new string[numberOfWords];
             for (var i = 0; i < numberOfWords; i++)
             {
-                var randomIndex = rand.Next(maxCount);
-                temp[i] = words.ElementAt(randomIndex);
+                var start = rand.Next(0, maxCount);
+                temp[i] = uniqueWords[start];
             }
-            return temp;
+
+            return new Span<string>(temp);
         }
 
-        public static IEnumerable<string> RemoveDuplicateWords(this IEnumerable<string> words)
+        public static Span<string> RemoveDuplicate(this Span<string> input)
         {
-            if (!words.Any())
+            var hashSet = new HashSet<string>();
+            var index = 0;
+
+            foreach (var item in input)
             {
-                return words;
+                if (hashSet.Add(item))
+                {
+                    input[index++] = item;
+                }
             }
-            return words.Select(x => x).Distinct();
+
+            return input.Slice(0, index);
+        }
+
+        public static bool ContainsUpperCaseChar(this string word)
+        {
+            return word.Any(char.IsUpper);
+        }
+
+        public static bool ContainsLowerCaseChar(this string word)
+        {
+            return word.Any(char.IsLower);
+        }
+
+        public static bool ContainsDigit(this string word)
+        {
+            return word.Any(char.IsDigit);
+        }
+
+        public static bool ContainsOnlyDigit(this string word)
+        {
+            return word.Any(char.IsDigit);
+        }
+
+        public static bool ContainsSpecialChar(this string word)
+        {
+            return word.Any(ch => !char.IsLetterOrDigit(ch));
+        }
+
+        public static bool ContainsWhiteSpace(this string word)
+        {
+            return word.Any(char.IsWhiteSpace);
+        }
+
+        public static bool ContainsPunctuation(this string word)
+        {
+            return word.Any(char.IsPunctuation);
+        }
+
+        public static bool ContainsSymbol(this string word)
+        {
+            return word.Any(char.IsSymbol);
+        }
+
+        public static bool ContainsOnlySymbol(this string word)
+        {
+            return word.Any(char.IsSymbol);
+        }
+
+        public static bool ContainsLetter(this string word)
+        {
+            return word.Any(char.IsLetter);
+        }
+
+        public static bool ContainsOnlyLetter(this string word)
+        {
+            return word.All(char.IsLetter);
         }
     }
 }
