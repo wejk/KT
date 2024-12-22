@@ -1,6 +1,6 @@
 ﻿namespace MyLibrary
 {
-    internal static class Constants
+    public static class Constants
     {
         public static readonly string[] Vegetables =
         [
