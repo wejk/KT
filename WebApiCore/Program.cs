@@ -1,3 +1,4 @@
+using MyLibrary.Data;
 using WebApiCore.Services;
 
 namespace WebApiCore
@@ -16,7 +17,7 @@ namespace WebApiCore
 
             builder.Services.AddMemoryCache();
             builder.Services.AddScoped<IHelperService, HelperService>();
-
+            builder.Services.AddSingleton<IRepo, JsonRepo>();
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.

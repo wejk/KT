@@ -4,3 +4,7 @@
 GET {{WebApiCore_HostAddress}}/api/Words/vegetables/{{count}}
 
 ###
+
+GET {{WebApiCore_HostAddress}}/api/words/samples
+
+###

@@ -19,5 +19,12 @@ namespace WebApiCore.Controllers
             var result = _helperService.Get(count);
             return Ok(result);
         }
+
+        [HttpGet("samples")]
+        public ActionResult<Dictionary<string, object>> GetSampleData()
+        {
+            var result = _helperService.GetSamples();
+            return Ok(result);
+        }
     }
 }

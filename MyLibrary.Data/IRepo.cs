@@ -6,4 +6,5 @@ public interface IRepo
     void Delete(string key);
     object Get(string key);
     void Update(string key, object value);
+    Dictionary<string, object> GetSamples();
 }
