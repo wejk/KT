@@ -3,5 +3,5 @@
 public interface IHelperService
 {
     string[] Get(int count);
-    Dictionary<string, object> GetSamples();
+    Dictionary<string, IList<string>> GetSamples();
 }

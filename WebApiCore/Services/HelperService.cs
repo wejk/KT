@@ -31,7 +31,7 @@ public sealed class HelperService : IHelperService
         }
     }
 
-    public Dictionary<string, object> GetSamples()
+    public Dictionary<string, IList<string>> GetSamples()
     {
         return _repo.GetSamples();
     }

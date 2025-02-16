@@ -2,96 +2,146 @@
 using System.Text.Json;
 
 namespace MyLibrary.Data;
-public class JsonRepo : IRepo
-{
-    private Dictionary<string, object> _samples;
 
+public sealed class JsonRepo : IRepo
+{
     private readonly ILogger<JsonRepo> _logger;
-    public JsonRepo(ILogger<JsonRepo> logger)
+    private readonly string _filePath;
+
+    public JsonRepo(ILogger<JsonRepo> logger, string fileName = "Data.json")
     {
         _logger = logger;
-        _samples = Read();
+        _filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, fileName);
     }
 
-    internal Dictionary<string, object> Read()
+    private Model Read()
     {
-        try
+        lock (this)
         {
-            var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Data.json");
-            using StreamReader r = new StreamReader(path);
-            string json = r.ReadToEnd();
-            var samples = JsonSerializer.Deserialize<Dictionary<string, object>>(json);
-            return samples is null ? throw new Exception("Error reading data.json") : samples;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error reading data.json");
-            throw;
+            try
+            {
+                if (!File.Exists(_filePath))
+                {
+                    throw new FileNotFoundException($"File not found: {_filePath}");
+                }
+
+                var json = File.ReadAllText(_filePath);
+                if (string.IsNullOrEmpty(json))
+                {
+                    return new Model();
+                }
+                var model = JsonSerializer.Deserialize<Model>(json);
+                return model!;
+            }
+            catch (JsonException ex)
+            {
+                _logger.LogError(ex, "Error deserializing data.json");
+                throw;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error reading data.json");
+                throw;
+            }
         }
     }
 
-    public Dictionary<string, object> GetSamples()
+    public Model GetAllData()
     {
-        return _samples;
+        return Read();
     }
 
-    public void Add(string key, object value)
-    {
-        if (string.IsNullOrEmpty(key))
-        {
-            throw new ArgumentNullException("Key cannot be null or empty");
-        }
-        if (value == null)
-        {
-            throw new ArgumentNullException("Value cannot be null");
-        }
-        if (_samples.ContainsKey(key))
-        {
-            throw new ArgumentException("Key already exists");
-        }
-        _samples.Add(key, value);
-    }
-
-    public void Update(string key, object value)
+    public void Add(string key, IList<string> value)
     {
         if (string.IsNullOrEmpty(key))
         {
-            throw new ArgumentNullException("Key cannot be null or empty");
+            throw new ArgumentNullException(nameof(key), "Key cannot be null or empty");
         }
-        if (value == null)
+        if (value?.Count == 0)
         {
-            throw new ArgumentNullException("Value cannot be null");
+            throw new ArgumentNullException(nameof(value), "Value cannot be null");
         }
-        if (!_samples.ContainsKey(key))
+
+        var model = Read();
+        if (model.Samples.ContainsKey(key))
         {
-            throw new ArgumentException("Key does not exist");
+            throw new ArgumentException("Key already exists", nameof(key));
         }
-        _samples[key] = value;
+        model.Samples.Add(key, value.ToArray());
+
+        WriteToJsonFile(model);
+    }
+
+    private void WriteToJsonFile(Model model)
+    {
+        lock (this)
+        {
+            try
+            {
+                var json = JsonSerializer.Serialize(model, new JsonSerializerOptions { WriteIndented = false });
+                File.WriteAllText(_filePath, json);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error while writing to Data.json");
+                throw;
+            }
+        }
+    }
+
+    public void Update(string key, IList<string> value)
+    {
+        if (string.IsNullOrEmpty(key))
+        {
+            throw new ArgumentNullException(nameof(key), "Key cannot be null or empty");
+        }
+        if (value.Count == 0)
+        {
+            throw new ArgumentNullException(nameof(value), "Value cannot be null");
+        }
+
+        var model = Read();
+        if (!model.Samples.ContainsKey(key))
+        {
+            throw new ArgumentException("Key does not exist", nameof(key));
+        }
+        model.Samples[key] = value.ToArray();
+        WriteToJsonFile(model);
     }
 
     public void Delete(string key)
     {
         if (string.IsNullOrEmpty(key))
         {
-            throw new ArgumentNullException("Key cannot be null or empty");
+            throw new ArgumentNullException(nameof(key), "Key cannot be null or empty");
         }
-        if (!_samples.ContainsKey(key))
+
+        var model = Read();
+        if (!model.Samples.ContainsKey(key))
         {
-            throw new ArgumentException("Key does not exist");
+            throw new ArgumentException("Key does not exist", nameof(key));
         }
-        _samples.Remove(key);
+        model.Samples.Remove(key);
+        WriteToJsonFile(model);
     }
 
-    public object Get(string key)
+    public IList<string> Get(string key)
     {
         if (string.IsNullOrEmpty(key))
         {
-            throw new ArgumentNullException("Key cannot be null or empty");
+            throw new ArgumentNullException(nameof(key), "Key cannot be null or empty");
         }
-        if (!_samples.ContainsKey(key))
+
+        var samples = Read().Samples;
+        if (!samples.TryGetValue(key, out var value))
         {
-            throw new ArgumentException("Key does not exist");
+            throw new ArgumentException("Key does not exist", nameof(key));
         }
-        return _samples[key];
+        return value;
+    }
+
+    public Dictionary<string, IList<string>> GetSamples()
+    {
+        return Read().Samples;
     }
 }

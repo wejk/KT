@@ -1,7 +1,7 @@
 ﻿namespace MyLibrary.Data
 {
-    public class Model
+    public sealed class Model
     {
-        public Dictionary<string, object> Samples { get; set; } = new Dictionary<string, object>();
+        public Dictionary<string, IList<string>> Samples { get; set; } = new Dictionary<string, IList<string>>();
     }
 }
