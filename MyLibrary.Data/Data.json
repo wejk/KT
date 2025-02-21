@@ -1,3 +1,5 @@
+// lang=json
+
 {
   "Samples": {
     "vegetables": [
@@ -8081,5 +8083,5 @@
       "The Outlaw Josey Wales",
       "The Good, the Bad and the Ugly"
     ]
-  } 
+  }
 }
