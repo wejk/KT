@@ -13,7 +13,14 @@ public sealed class WordsController : ControllerBase
         _helperService = helperService;
     }
 
-    [HttpGet("{category:Categories}/{count:int}")]
+    [HttpGet("categories")]
+    public ActionResult<string[]> GetCategories()
+    {
+        var result = Enum.GetNames(typeof(Categories));
+        return Ok(result);
+    }
+
+    [HttpGet("{category}/{count:int}")]
     public ActionResult<string[]> Get([FromRoute] Categories category, [FromRoute] int count)
     {
         var result = _helperService.Get(count, category);

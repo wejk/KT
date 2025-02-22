@@ -8,3 +8,16 @@ GET {{WebApiCore_HostAddress}}/api/Words/vegetables/{{count}}
 GET {{WebApiCore_HostAddress}}/api/words/samples
 
 ###
+
+GET {{WebApiCore_HostAddress}}/api/words/vegetables/10
+
+###
+
+@category=fruit
+GET {{WebApiCore_HostAddress}}/api/Words/{{category}}/{{count}}
+
+###
+
+GET {{WebApiCore_HostAddress}}/api/words/categories
+
+###
