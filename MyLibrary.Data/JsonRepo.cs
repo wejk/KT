@@ -51,13 +51,13 @@ public sealed class JsonRepo : IRepo
         return Read();
     }
 
-    public void Add(string key, IList<string> value)
+    public void Add(string key, IEnumerable<string> value)
     {
         if (string.IsNullOrEmpty(key))
         {
             throw new ArgumentNullException(nameof(key), "Key cannot be null or empty");
         }
-        if (value?.Count == 0)
+        if (!value.Any())
         {
             throw new ArgumentNullException(nameof(value), "Value cannot be null");
         }
@@ -89,13 +89,13 @@ public sealed class JsonRepo : IRepo
         }
     }
 
-    public void Update(string key, IList<string> value)
+    public void Update(string key, IEnumerable<string> value)
     {
         if (string.IsNullOrEmpty(key))
         {
             throw new ArgumentNullException(nameof(key), "Key cannot be null or empty");
         }
-        if (value.Count == 0)
+        if (!value.Any())
         {
             throw new ArgumentNullException(nameof(value), "Value cannot be null");
         }
@@ -125,7 +125,7 @@ public sealed class JsonRepo : IRepo
         WriteToJsonFile(model);
     }
 
-    public IList<string> Get(string key)
+    public IEnumerable<string> Get(string key, int count = 10)
     {
         if (string.IsNullOrEmpty(key))
         {
@@ -137,10 +137,10 @@ public sealed class JsonRepo : IRepo
         {
             throw new ArgumentException("Key does not exist", nameof(key));
         }
-        return value;
+        return value.Take(count);
     }
 
-    public Dictionary<string, IList<string>> GetSamples()
+    public Dictionary<string, IEnumerable<string>> GetSamples()
     {
         return Read().Samples;
     }

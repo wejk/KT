@@ -2,9 +2,9 @@
 
 public interface IRepo
 {
-    void Add(string key, IList<string> value);
+    void Add(string key, IEnumerable<string> value);
     void Delete(string key);
-    IList<string> Get(string key);
-    void Update(string key, IList<string> value);
-    Dictionary<string, IList<string>> GetSamples();
+    IEnumerable<string> Get(string key, int count);
+    void Update(string key, IEnumerable<string> value);
+    Dictionary<string, IEnumerable<string>> GetSamples();
 }

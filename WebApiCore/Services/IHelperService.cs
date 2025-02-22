@@ -2,6 +2,6 @@
 
 public interface IHelperService
 {
-    string[] Get(int count);
-    Dictionary<string, IList<string>> GetSamples();
+    string[] Get(int count, Categories key);
+    Dictionary<string, IEnumerable<string>> GetSamples();
 }
